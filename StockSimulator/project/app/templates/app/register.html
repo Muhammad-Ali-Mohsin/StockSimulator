@@ -1,0 +1,54 @@
+{% extends "app/layout.html" %}
+
+{% block body %}
+
+    {% if message %}
+        <div>{{ message }}</div>
+    {% endif %}
+    
+    <div class="row justify-content-center" style="padding-top: 5%;">
+        <div class="card shadow" style="width:22rem">
+            <div class="card-body">
+        
+                <div class="pt-4 pb-2">
+                    <h5 class="card-title text-center fs-4">Register</h5>
+                    <p class="text-center small">Create an account below</p>
+                </div>
+        
+                <form action="{% url 'register' %}" method="post" class="row gap-3">
+                    {% csrf_token %}
+                    
+                    <div class="col-12">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" name="username" class="form-control" id="username" required autofocus>
+                    </div>
+        
+                    <div class="col-12">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" name="email" class="form-control" id="email" required>
+                    </div>
+        
+                    <div class="col-12">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" name="password" class="form-control" id="password" required>
+                    </div>
+    
+                    <div class="col-12">
+                        <label for="confirmation" class="form-label">Confirm Password</label>
+                        <input type="password" name="confirmation" class="form-control" id="confirmation" required>
+                    </div>
+
+                    <div class="col-12">
+                        <button class="btn btn-primary w-100" type="submit">Create Account</button>
+                    </div>
+
+                    <div class="col-12">
+                        <p class="small mb-0 text-center">Already have an account? <a href="{% url 'login' %}">Log in</a></p>
+                    </div>
+                </form>
+        
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

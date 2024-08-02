@@ -1,0 +1,92 @@
+{% extends "app/layout.html" %}
+{% load static %}
+
+{%  block script %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+    <script src="{% static 'app/charts.js' %}"></script>
+{% endblock %}
+
+{% block body %}
+    
+    <h1 class="text-center pt-4">{{ user }}'s Stocks</h1>
+    <br>
+    <div class="text-center">
+        <a href="{% url 'new_stock' %}" class="btn btn-primary text-center">Create New Stock</a>
+    </div>
+    <br>
+
+    {% for element in data %}
+
+        <div class="row justify-content-center mb-4">
+            <div class="card shadow col-sm-6 item-card" data-bs-toggle="modal" data-bs-target="#stock_modal_{{ forloop.counter }}">
+                <div class="card-body">
+                    <h5 class="card-title">{{ element.stock.name }}</h5>
+                    <ul>
+                        <li>Price: ${{ element.stock.price }}</li>
+                        <li>Volatility: {{ element.stock.volatility }}</li>
+                        <li>Annual Change: {{ element.stock.annualchange }}%</li>
+                    </ul>
+                    <form action="{% url 'delete_stock' %}" method="post">
+                        {% csrf_token %}
+                        <input type="text" value="{{ element.stock.id }}" name="id" hidden>
+                        <button class="btn btn-close position-absolute top-0 end-0 mt-3 me-3" type="submit"></button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modal -->
+        <div class="modal fade" id="stock_modal_{{ forloop.counter }}" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="stock_modal_{{ forloop.counter }}_label">{{ element.stock.name }}</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="{% url 'edit_stock' %}" method="post" class="row gap-3" id="stock_modal_{{ forloop.counter }}_form">
+                            {% csrf_token %}
+                            <input type="text" value="{{ element.stock.id }}" name="stock_id" hidden>
+
+                            <div class="col-12">
+                                <label for="price" class="form-label">Price</label>
+                                <div class="input-group">
+                                    {{ element.form.price }}
+                                    <span class="input-group-text">$</span>
+                                </div>
+                            </div>
+        
+                            <div class="col-12">
+                                <label for="volatility" class="form-label">Volatility</label>
+                                <div class="input-group">
+                                    {{ element.form.volatility }}
+                                </div>
+                            </div>
+        
+                            <div class="col-12">
+                                <label for="annualchange" class="form-label">Annual Change</label>
+                                <div class="input-group">
+                                    {{ element.form.annualchange }}
+                                    <span class="input-group-text">%</span>
+                                </div>
+                            </div>
+        
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" form="stock_modal_{{ forloop.counter }}_form">Save changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% empty %}
+
+        <div class="alert alert-danger text-center" role="alert">
+            You haven't defined any stocks!
+        </div>
+
+    {% endfor %}
+
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "app/layout.html" %}
+
+{% block body %}
+
+    {% if message %}
+        <div>{{ message }}</div>
+    {% endif %}
+    
+    <div class="row justify-content-center pt-5-percent">
+        <div class="card shadow mw-20">
+            <div class="card-body">
+        
+                <div class="pt-4 pb-2">
+                    <h5 class="card-title text-center fs-4">Login</h5>
+                    <p class="text-center small">Login to your account below</p>
+                </div>
+        
+                <form action="{% url 'login' %}" method="post" class="row gap-3">
+                    {% csrf_token %}
+
+                    <div class="col-12">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" name="username" class="form-control" id="username" required autofocus>
+                    </div>
+        
+                    <div class="col-12">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" name="password" class="form-control" id="password" required>
+                    </div>
+
+                    <div class="col-12">
+                        <button class="btn btn-primary w-100" type="submit">Login</button>
+                    </div>
+
+                    <div class="col-12">
+                        <p class="small mb-0 text-center">Don't Have an account? <a href="{% url 'register' %}">Register here</a></p>
+                    </div>
+                </form>
+        
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

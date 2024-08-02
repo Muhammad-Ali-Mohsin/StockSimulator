@@ -1,0 +1,65 @@
+{% extends "app/layout.html" %}
+{% load static %}
+
+{% block script %}
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+{% endblock %}
+
+{% block body %}
+
+    {% if message %}
+        <div>{{ message }}</div>
+    {% endif %}
+    
+    <div class="row justify-content-center pt-4">
+        <div class="card shadow mw-50">
+            <div class="card-body">
+        
+                <div class="pt-4 pb-2">
+                    <h5 class="card-title text-center fs-4">New Event</h5>
+                    <p class="text-center small">Create a new event below</p>
+                </div>
+        
+                <form action="{% url 'new_event' %}" method="post" class="row gap-3">
+                    {% csrf_token %}
+
+                    <div class="col-12">
+                        <label for="name" class="form-label">Name</label>
+                        <div class="input-group">
+                            {{ new_event_form.name }}
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="strength" class="form-label">Strength</label>
+                        <img src="{% static 'app/images/info-circle.svg' %}" data-bs-toggle="tooltip" title="Event strength is how big of an impact the event has where a positive number drives the price up and a negative number drives the price down.">
+                        <div class="input-group">
+                            {{ new_event_form.strength }}
+                        </div>
+                    </div>
+        
+                    <div class="col-12">
+                        <label for="decay_rate" class="form-label">Decay Rate</label>
+                        <img src="{% static 'app/images/info-circle.svg' %}" data-bs-toggle="tooltip" title="Decay rate is the factor by which the event dies down over time. A lower decay rate means the event will last longer.">
+                        <div class="input-group">
+                            {{ new_event_form.decay_rate }}
+                        </div>
+                    </div>
+
+                    <br>
+
+                    <div class="col-12">
+                        <button class="btn btn-primary w-100" type="submit">Create Event</button>
+                    </div>
+                </form>
+        
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+    </script>
+
+{% endblock %}

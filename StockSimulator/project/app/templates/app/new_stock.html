@@ -1,0 +1,73 @@
+{% extends "app/layout.html" %}
+{% load static %}
+
+{% block script %}
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+{% endblock %}
+
+{% block body %}
+
+    {% if message %}
+        <div>{{ message }}</div>
+    {% endif %}
+    
+    <div class="row justify-content-center pt-4">
+        <div class="card shadow mw-50">
+            <div class="card-body">
+        
+                <div class="pt-4 pb-2">
+                    <h5 class="card-title text-center fs-4">New Stock</h5>
+                    <p class="text-center small">Create a new stock below</p>
+                </div>
+        
+                <form action="{% url 'new_stock' %}" method="post" class="row gap-3">
+                    {% csrf_token %}
+
+                    <div class="col-12">
+                        <label for="name" class="form-label">Name</label>
+                        <div class="input-group">
+                            {{ new_stock_form.name }}
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="price" class="form-label">Price</label>
+                        <div class="input-group">
+                            {{ new_stock_form.price }}
+                            <span class="input-group-text">$</span>
+                        </div>
+                    </div>
+        
+                    <div class="col-12">
+                        <label for="volatility" class="form-label">Volatility</label>
+                        <img src="{% static 'app/images/info-circle.svg' %}" data-bs-toggle="tooltip" title="Volatility is a scale between 0 and 1 where 0 is low volatility and 1 is high volatility">
+                        <div class="input-group">
+                            {{ new_stock_form.volatility }}
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="annualchange" class="form-label">Annual Change</label>
+                        <div class="input-group">
+                            {{ new_stock_form.annualchange }}
+                            <span class="input-group-text">%</span>
+                        </div>
+                    </div>
+
+                    <br>
+
+                    <div class="col-12">
+                        <button class="btn btn-primary w-100" type="submit">Create Stock</button>
+                    </div>
+                </form>
+        
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+    </script>
+
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "app/layout.html" %}
+
+{% block body %}
+
+    <div class="container-xxl bd-gutter pt-10-percent">
+        <div class="col-md-8 mx-auto text-center">
+            <h1 class="mb-3 fw-semibold lh-1">Simulate Stock Performance</h1>
+            <div class="lead mb-4 rotating-text">
+                <span>
+                    A visualisation tool for your market insights <br>
+                    Define custom stocks and simulate their performance <br>
+                    Define events which impact your stock throughout the year <br>
+                    Create a custom portfolio using your stocks <br>
+                    Generate charts alongside your simulation <br>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center pt-5-percent">
+        <div class="col card-body ms-4 ps-4 me-4 pe-4 pt-4 mt-4 mw-50">
+            <p>
+                StockSimulator allows you to define custom stocks and simulate their performance over a year if they existed in a bubble.
+                You can then define custom events which affect the stock allowing you to visualise how your insights might affect the market.
+            </p>
+        </div>
+
+        <div class="col card-body ms-4 ps-4 me-4 pe-4 pt-4 mt-4 mw-50">
+            <p>
+                Disclaimer: StockSimulator does not predict the market but rather estimates how a stock might perform based on user defined attributes. 
+                It is primarily a visualisation tool and should not be used as a basis for financial decisions.
+            </p>
+        </div>
+    </div>
+
+
+
+{% endblock %}

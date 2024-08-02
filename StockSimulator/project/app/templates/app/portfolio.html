@@ -1,0 +1,140 @@
+{% extends "app/layout.html" %}
+{% load static %}
+
+{%  block script %}
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+    <script src="{% static 'app/charts.js' %}"></script>
+{% endblock %}
+
+{% block body %}
+    
+    <h1 class="text-center pt-4">{{ user }}'s Portfolio</h1>
+
+    <div class="row justify-content-center pt-4">
+        <div class="card shadow container" style="max-width:100rem">
+            <div class="card-body pt-4 pb-4 d-flex row">
+
+                {% if stocks_in_portfolio %}
+
+                    {{ doughnut_data|json_script:"doughnut_data" }}
+
+                    <div id="portfolio-chart" style="width: 50rem; height: 30rem;"></div>
+                    <script type="text/javascript">
+                        const doughnut_data = JSON.parse(document.getElementById('doughnut_data').textContent);
+                        console.log(doughnut_data)
+                        createDoughnut("portfolio-chart", doughnut_data)
+                    </script>
+
+                    <table class="table col gy-5">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Stock Name</th>
+                                <th scope="col">Units Held</th>
+                                <th scope="col">Unit Value</th>
+                                <th scope="col">Total Value</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% for record in stocks_in_portfolio %}
+                                <tr>
+                                    <th scope="row">{{ forloop.counter }}</th>
+                                    <td>{{ record.stock.name }}</td>
+                                    <td>{{ record.amount }}</td>
+                                    <td>${{ record.stock.price }}</td>
+                                    <td>${% widthratio record.amount 1 record.stock.price %}</td>
+                                    <td>
+                                        <form action="{% url 'remove_stock' %}" method="post">
+                                            {% csrf_token %}
+                                            <input type="text" value="{{ record.id }}" name="id" hidden>
+                                            <button class="btn btn-close" type="submit"></button>
+                                        </form>
+                                    </td>
+                                </tr>    
+                            {% endfor %}
+
+                        </tbody>
+                    </table>
+
+                </div>
+
+                <div class="alert alert-success ms-auto" role="alert" style="width: 25rem;">
+                    Total Value: ${{ total_value }}
+                </div>
+
+            {% else %}
+
+                <div class="alert alert-danger text-center" role="alert">
+                    Your portfolio is currently empty!
+                </div>
+            
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row justify-content-center pt-4">
+        <div class="card shadow container mw-20">
+            <div class="card-body pt-4 pb-4 d-flex row">
+        
+                {% if has_stock %}
+
+                    <div class="justify-content-center text-center">
+                        <p>Add Stock to Portfolio</p>
+                        <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#portfolio_modal">Add Stock</button>
+                    </div>
+
+
+                    <!-- Modal -->
+                    <div class="modal fade" id="portfolio_modal" tabindex="-1">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="portfolio_modal_label">Add Stock</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form action="{% url 'add_stock' %}" method="post" class="row gap-3" id="portfolio_modal_form">
+                                        {% csrf_token %}
+                                        <input type="text" value="{{ stock.0.id }}" name="stock_id" hidden>
+
+                                        <div class="col-12">
+                                            <label for="stock" class="form-label">Stock</label>
+                                            <div class="input-group">
+                                                {{ form.stock }}
+                                            </div>
+                                        </div>
+                            
+                                        <div class="col-12">
+                                            <label for="units" class="form-label">Amount</label>
+                                            <div class="input-group">
+                                                {{ form.amount }}
+                                                <span class="input-group-text">Units</span>
+                                            </div>
+                                        </div>
+                    
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary" form="portfolio_modal_form">Add Stock</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                {% else %}
+
+                    <div class="justify-content-center text-center">
+                        <p>Create some stocks</p>
+                        <a href="{% url 'new_stock' %}" class="btn btn-primary" style="width: 9rem;">Create Stock</a>
+                    </div>
+
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

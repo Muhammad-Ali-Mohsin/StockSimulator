@@ -1,0 +1,306 @@
+{% extends "app/layout.html" %}
+{% load static %}
+
+{%  block script %}
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+    <script src="{% static 'app/charts.js' %}"></script>
+    <script src="{% static 'app/simulator.js' %}"></script>
+{% endblock %}
+
+{% block body %}
+
+    <h1 class="text-center pt-4">Simulator</h1>
+
+
+    <div class="row">
+
+        <!-- Portfolio -->
+        <div class="col justify-content-center pt-4 position-relative start-0 pe-4 ps-4">
+            <div class="card shadow">
+                <div class="card-body pt-4 pb-4 d-flex row">
+
+                    <div class="pt-4 pb-2">
+                        <h5 class="card-title text-center fs-4">Portfolio</h5>
+                    </div>
+
+                    {% if stocks_in_portfolio %}
+
+                        {{ doughnut_data|json_script:"doughnut_data" }}
+
+                        <div id="portfolio-chart" style="width: 40rem; height: 20rem;"></div>
+                        <script type="text/javascript">
+                            const doughnut_data = JSON.parse(document.getElementById('doughnut_data').textContent);
+                            console.log(doughnut_data)
+                            createDoughnut("portfolio-chart", doughnut_data)
+                        </script>
+
+                        <table class="table col gy-5">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Stock Name</th>
+                                    <th scope="col">Units Held</th>
+                                    <th scope="col">Unit Value</th>
+                                    <th scope="col">Total Value</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                {% for record in stocks_in_portfolio %}
+                                    <tr>
+                                        <th scope="row">{{ forloop.counter }}</th>
+                                        <td>{{ record.stock.name }}</td>
+                                        <td>{{ record.amount }}</td>
+                                        <td>${{ record.stock.price }}</td>
+                                        <td>${% widthratio record.amount 1 record.stock.price %}</td>
+                                    </tr>    
+                                {% endfor %}
+
+                            </tbody>
+                        </table>
+
+
+                    {% else %}
+
+                        <div class="col-12 w-75 alert alert-danger text-center position-relative start-50 translate-middle-x" role="alert">
+                            Your portfolio is currently empty!
+                        </div>
+
+                        <div class="col-12">
+                            <a href="{% url 'portfolio' %}" class="btn btn-primary w-100">Edit Portfolio</a>
+                        </div>
+                
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Events -->
+        <div class="col justify-content-center pt-4 position-relative end-0 pe-4 ps-4" style="min-width: 20rem;">
+            <div class="card shadow">
+                <div class="card-body">
+            
+                    <div class="pt-4 pb-2">
+                        <h5 class="card-title text-center fs-4">Events</h5>
+                    </div>
+            
+                    <p class="text-center" id="no-events-text">You haven't added any events</p>
+                    <ul id="events-list" class="list-group"></ul>
+                    <br>
+
+                </div>
+            </div>
+
+            <br>
+
+            <div class="card shadow">
+                <div class="card-body">
+            
+                    <div class="pt-4 pb-2">
+                        <h5 class="card-title text-center fs-4">Add Event</h5>
+                        <p class="text-center small">Add an event to the simulator below</p>
+                    </div>
+            
+                    {% if has_events %}
+
+                        <form class="row gap-3">
+
+                            <div class="col-12">
+                                <label for="date" class="form-label">Date</label>
+                                <img src="{% static 'app/images/info-circle.svg' %}" data-bs-toggle="tooltip" title="This is the date the event will start on.">
+                                <div class="input-group">
+                                    {{ form.date }}
+                                </div>
+                            </div>
+                
+                            <div class="col-12">
+                                <label for="event" class="form-label">Event</label>
+                                <div class="input-group">
+                                    {{ form.event }}
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <button type="button" class="btn btn-primary w-100" id="add-event-btn">Add Event</button>
+                            </div>
+                        </form>
+
+                    {% else %}
+
+                        <div class="col-12 w-75 alert alert-danger text-center position-relative start-50 translate-middle-x" role="alert">
+                            You haven't defined any events!
+                        </div>
+
+                        <div class="col-12">
+                            <a href="{% url 'new_event' %}" class="btn btn-primary w-100">Create Event</a>
+                        </div>
+
+                    {% endif %}
+            
+                </div>
+            </div>
+        </div>
+
+        <!-- Simulator -->
+        <div class="col justify-content-center pt-4 pe-4 ps-4" style="min-width: 20rem;">
+            <div class="card shadow">
+                <div class="card-body">
+            
+                    <div class="pt-4 pb-2">
+                        <h5 class="card-title text-center fs-4">Simulator</h5>
+                        <p class="text-center small">Start the simulation</p>
+                        <p>This will simulate all the stocks in your portfolio for a year with and without the events you have specified. It will then produce charts showcasing this data.</p>
+                    </div>
+
+                    {% if stocks_in_portfolio %}
+
+                        <div class="col-12">
+                            {% csrf_token %}
+                            <button type="button" class="btn btn-primary w-100" id="start-simulation-btn">Start Simulation</button>
+                        </div>
+
+                    {% else %}
+
+                        <div class="col-12 w-75 alert alert-info text-center position-relative start-50 translate-middle-x" role="alert">
+                            Add some stocks to your portfolio to get started!
+                        </div>
+
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Simulation Results -->
+        <div id="simulation-results" class="justify-content-center pt-4 pe-4 ps-4" style="min-width: 20rem;" hidden>
+
+            <h1 class="text-center pt-4 mt-4 pb-4 mb-4">Simulation Results</h1>
+
+            <div class="card shadow">
+                <div class="card-body">
+            
+                    <!-- Tab Links -->
+                    <ul class="nav nav-underline nav-fill" id="simulation-tabs">
+
+                        <!-- Portfolio Link -->
+                        <li class="nav-item dropdown dropdown-center">
+                            <button class="nav-link dropdown-toggle active" data-bs-toggle="dropdown" type="button">Portfolio</button>
+                            <ul class="dropdown-menu">
+                                <li><button type="button" class="dropdown-item active" id="portfolio-tab-events" data-bs-toggle="tab" data-bs-target="#portfolio-tab-events-pane">With Events</button></li>
+                                <li><button type="button" class="dropdown-item" id="portfolio-tab" data-bs-toggle="tab" data-bs-target="#portfolio-tab-pane">Without Events</button></li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item dropdown dropdown-center" id="template-dropdown" hidden>
+                            <button class="nav-link dropdown-toggle" id="template-tab-btn" data-bs-toggle="dropdown" type="button">Template Dropdown</button>
+                            <ul class="dropdown-menu">
+                                <li><button type="button" class="dropdown-item" id="template-tab-events" data-bs-toggle="tab" data-bs-target="#template-tab-events-pane">With Events</button></li>
+                                <li><button type="button" class="dropdown-item" id="template-tab" data-bs-toggle="tab" data-bs-target="#template-tab-pane">Without Events</button></li>
+                            </ul>
+                        </li>
+
+                    </ul>
+
+                    <!-- Tab Content -->
+                    <div class="tab-content" id="simulation-tabs-content">
+                        <div class="tab-pane active" id="portfolio-tab-events-pane" tabindex="0">
+                            <div class="row d-flex">
+
+                                <div id="portfolio-tab-events-pane-linechart" class="pt-4 mt-4" style="width: 70rem; height: 40rem;"></div>
+        
+                                <table class="table col gy-5">
+                                    <thead>
+                                        <tr class="text-center">
+                                            <th scope="col">#</th>
+                                            <th scope="col">Date</th>
+                                            <th scope="col">Total Value</th>
+                                            <th scope="col">Last 30 days</th>
+                                            <th scope="col">All time</th>
+                                        </tr>
+                                    </thead>
+        
+                                    <tbody id="portfolio-tab-events-pane-table"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="portfolio-tab-pane" tabindex="0">
+                            <div class="row d-flex">
+
+                                <div id="portfolio-tab-pane-linechart" class="pt-4 mt-4" style="width: 70rem; height: 40rem;"></div>
+        
+                                <table class="table col gy-5">
+                                    <thead>
+                                        <tr class="text-center">
+                                            <th scope="col">#</th>
+                                            <th scope="col">Date</th>
+                                            <th scope="col">Total Value</th>
+                                            <th scope="col">Last 30 days</th>
+                                            <th scope="col">All time</th>
+                                        </tr>
+                                    </thead>
+        
+                                    <tbody id="portfolio-tab-pane-table"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="template-tab-events-pane" tabindex="0">
+                            <div class="row d-flex">
+
+                                <div id="template-tab-events-pane-linechart" class="pt-4 mt-4" style="width: 70rem; height: 40rem;"></div>
+        
+                                <table class="table col gy-5">
+                                    <thead>
+                                        <tr class="text-center">
+                                            <th scope="col">#</th>
+                                            <th scope="col">Date</th>
+                                            <th scope="col">Total Value</th>
+                                            <th scope="col">Last 30 days</th>
+                                            <th scope="col">All time</th>
+                                        </tr>
+                                    </thead>
+        
+                                    <tbody id="template-tab-events-pane-table"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="template-tab-pane" tabindex="0">
+                            <div class="row d-flex">
+
+                                <div id="template-tab-pane-linechart" class="pt-4 mt-4" style="width: 70rem; height: 40rem;"></div>
+        
+                                <table class="table col gy-5">
+                                    <thead>
+                                        <tr class="text-center">
+                                            <th scope="col">#</th>
+                                            <th scope="col">Date</th>
+                                            <th scope="col">Total Value</th>
+                                            <th scope="col">Last 30 days</th>
+                                            <th scope="col">All time</th>
+                                        </tr>
+                                    </thead>
+        
+                                    <tbody id="template-tab-pane-table"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+    </script>
+
+{% endblock %}
